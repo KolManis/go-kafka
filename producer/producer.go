@@ -64,10 +64,10 @@ func PushCommentToQueue(topic string, message []byte) error {
 
 func createComment(c *gin.Context) {
 	var comment Comment
-	if err := c.ShouldBindJSON(comment); err != nil {
+	if err := c.ShouldBindJSON(&comment); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": err,
+			"message": err.Error(),
 		})
 		return
 	}
