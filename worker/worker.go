@@ -21,6 +21,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer consumer.Close()
 
 	fmt.Println("consumer started")
 	sigchan := make(chan os.Signal, 1)
@@ -37,7 +38,7 @@ func main() {
 
 			case msg := <-consumer.Messages():
 				msgCount++
-				fmt.Printf("Received message Count: %d | Topic(&s) | Message(%s)n", msgCount, string(msg.Topic), string(msg.Value))
+				fmt.Printf("Received message Count: %d | Topic(&s) | Message(%s)\n", msgCount, string(msg.Topic), string(msg.Value))
 			case <-sigchan:
 				fmt.Printf("Interruption detected")
 				doneCh <- struct{}{}
@@ -47,9 +48,6 @@ func main() {
 
 	<-doneCh
 	fmt.Println("Processed", msgCount, "messages")
-	if err := worker.Close(); err != nil {
-		panic(err)
-	}
 }
 
 func connectConsumer(brokersUrl []string) (sarama.Consumer, error) {
