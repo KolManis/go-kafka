@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,13 +14,13 @@ func main() {
 	topic := "comments"
 	worker, err := connectConsumer([]string{"localhost:29092"})
 	if err != nil {
-		panic(err)
+		log.Fatal("Error connecting consumer:", err)
 	}
 	defer worker.Close()
 
 	consumer, err := worker.ConsumePartition(topic, 0, sarama.OffsetOldest)
 	if err != nil {
-		panic(err)
+		log.Fatal("Error creating partition consumer:", err)
 	}
 	defer consumer.Close()
 
@@ -42,6 +43,7 @@ func main() {
 			case <-sigchan:
 				fmt.Printf("Interruption detected")
 				doneCh <- struct{}{}
+				return
 			}
 		}
 	}()
@@ -53,8 +55,8 @@ func main() {
 func connectConsumer(brokersUrl []string) (sarama.Consumer, error) {
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
-	conn, err := sarama.NewConsumer(brokersUrl, config)
 
+	conn, err := sarama.NewConsumer(brokersUrl, config)
 	if err != nil {
 		return nil, err
 	}
